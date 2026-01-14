@@ -54,7 +54,13 @@ As much as this module attempts to be versatile in usage, there are some VERY HA
 
     `$filter->set_accepted(qw/fname firstname first_name/);` 
 - No built-in filter lists except null `[]` = none
-- No fields ADDED to data
+- No fields ADDED to yielded data, EXCEPT:
+
+    * If the provided data resolves to a list or array with an odd number of elements, 
+    the LAST element is treated as a flag, set to the value 1
+
+    * If the provided data resolves to a single non-reference scalar (probably a text string) 
+    the data is returned as a hashref value with the key ‘_’
 
 ## Installation
 

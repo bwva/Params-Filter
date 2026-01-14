@@ -125,7 +125,17 @@ as ways to adjust a filter's behavior - or just have alternative filters.
 
 =item * No built-in filter lists except null [] = none
 
-=item * No fields B<added> to data
+=item * No fields B<added> to data, EXCEPT:
+
+=over8
+
+* If the provided data resolves to a list or array with an odd number of elements, 
+    the LAST element is treated as a flag, set to the value 1
+
+* If the provided data resolves to a single non-reference scalar (probably a text string) 
+    the data is returned as a hashref value with the key ‘_’
+
+=back
 
 =back
 
