@@ -134,7 +134,7 @@ as ways to adjust a filter's behavior - or just have alternative filters.
 
 * If the provided data resolves to a single non-reference scalar (probably a text string) 
     the data is returned as a hashref value with the key ‘_’, and returned if '_' is
-    included in the `accepted` list or accepted is set to `['*']` (accept all)
+    included in the `accepted` list or the list is set to `['*']` (accept all)
 
 =back
 
