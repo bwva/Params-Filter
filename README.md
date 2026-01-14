@@ -201,7 +201,7 @@ $filter->set_required($config_fields->{required})
 - **No value checking**: Only presence/absence of fields
 - **Debug mode**: Optional warnings about unrecognized or excluded fields
 - **Method chaining**: Modifier methods return `$self`
-- **Perl 5.40+**: Modern Perl with signatures and post-deref
+- **Perl 5.36+**: Modern Perl with signatures and post-deref
 - **No dependencies**: Only core Perl's Exporter
 
 ## Parameters

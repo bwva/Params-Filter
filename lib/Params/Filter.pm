@@ -624,7 +624,7 @@ Both L</filter> and L</apply> return different values depending on context:
 
 =item * **Method chaining** - Modifier methods return C<$self>
 
-=item * **Perl 5.40+** - Modern Perl with signatures and post-deref
+=item * **Perl 5.36+** - Modern Perl with signatures and post-deref
 
 =item * **No dependencies** - Only core Perl's L<Exporter>
 
