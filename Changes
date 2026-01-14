@@ -1,5 +1,13 @@
 Revision history for Params-Filter
 
+v0.6_002 2026-01-14 (DEVELOPER RELEASE)
+    - Improved message consistency: separated parsing messages from debug warnings
+    - Parsing messages (always shown): plain text args, odd array elements
+    - Debug warnings (debug mode only): unrecognized fields, excluded fields
+    - Updated DEBUG MODE documentation to clarify message types
+    - Updated Common Status Messages section with parsing vs debug distinction
+    - All 59 tests still passing
+
 v0.6_01 2026-01-14 (DEVELOPER RELEASE)
     - Beta release for CPAN testing and feedback
     - Renamed for CPAN publication: Local::Params::Filter → Params::Filter

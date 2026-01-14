@@ -1,6 +1,6 @@
 package Params::Filter;
 use v5.36;
-our $VERSION = '0.006_001';
+our $VERSION = '0.006_002';
 
 =head1 NAME
 
@@ -425,7 +425,8 @@ In scalar context: Hashref with filtered parameters, or C<undef> on failure
 
 sub filter ($args,$req,$ok=[],$no=[],$db=0) {
 	my %args		= ();
-	my @warnings	= ();
+	my @messages	= ();	# Parsing messages (always reported)
+	my @warnings	= ();	# Debug warnings (only when $db is true)
 
 	if (ref $args eq 'HASH') {
 		%args	= $args->%*
@@ -441,11 +442,11 @@ sub filter ($args,$req,$ok=[],$no=[],$db=0) {
 				my $preview = length($args[0]) > 20
 					? substr($args[0], 0, 20) . '...'
 					: $args[0];
-				push @warnings => "Plain text argument accepted with key '_': '$preview'";
+				push @messages => "Plain text argument accepted with key '_': '$preview'";
 			}
 			elsif ( @args % 2 ) {
 				%args = (@args, 1);				# make last arg element a flag
-				push @warnings => "Odd number of arguments provided; " .
+				push @messages => "Odd number of arguments provided; " .
 					"last element '$args[-1]' converted to flag with value 1";
 			}
 			else {
@@ -458,7 +459,7 @@ sub filter ($args,$req,$ok=[],$no=[],$db=0) {
 		my $preview = length($args) > 20
 			? substr($args, 0, 20) . '...'
 			: $args;
-		push @warnings => "Plain text argument accepted with key '_': '$preview'";
+		push @messages => "Plain text argument accepted with key '_': '$preview'";
 	}
 
 	my @required_flds	= $req->@*;
@@ -541,8 +542,11 @@ sub filter ($args,$req,$ok=[],$no=[],$db=0) {
 		push @warnings => "Ignoring excluded arguments: " .
 			join ', ' => map { "'$_'" } @excluded;
 	}
-	my $return_msg	= @warnings
-		? join "\n" => @warnings
+
+	# Combine parsing messages (always) with debug warnings (if debug mode)
+	my @all_msgs	= (@messages, @warnings);
+	my $return_msg	= @all_msgs
+		? join "\n" => @all_msgs
 		: "Admitted";
 
 	return wantarray ? ( $filtered, $return_msg ) : $filtered;
@@ -578,9 +582,13 @@ Both L</filter> and L</apply> return different values depending on context:
 
 =item * "Admitted" - All required fields present, filtering successful
 
-=item * "Ignoring excluded arguments: 'field1', 'field2'..." - Debug message
+=item * "Plain text argument accepted with key '_': '...'" - Parsing message (always shown)
 
-=item * "Ignoring unrecognized arguments: 'field1', 'field2'..." - Debug message
+=item * "Odd number of arguments provided; last element 'X' converted to flag with value 1" - Parsing message (always shown)
+
+=item * "Ignoring excluded arguments: 'field1', 'field2'..." - Debug message (debug mode only)
+
+=item * "Ignoring unrecognized arguments: 'field1', 'field2'..." - Debug message (debug mode only)
 
 =item * "Unable to initialize without required arguments: 'field1', 'field2'..." - Error
 
@@ -614,7 +622,7 @@ Both L</filter> and L</apply> return different values depending on context:
 
 =head1 DEBUG MODE
 
-Debug mode provides warnings about what happened during filtering:
+Debug mode provides additional information about field filtering during development:
 
     my ($filtered, $msg) = filter(
         $input,
@@ -624,7 +632,7 @@ Debug mode provides warnings about what happened during filtering:
         1,  # Enable debug mode
     );
 
-Debug warnings include:
+Debug warnings (only shown when debug mode is enabled):
 
 =over 4
 
@@ -632,11 +640,21 @@ Debug warnings include:
 
 =item * Unrecognized fields that were ignored
 
+=back
+
+Parsing messages (always shown, regardless of debug mode):
+
+=over 4
+
 =item * Plain text arguments accepted with key '_'
 
 =item * Odd number of array elements converted to flags
 
 =back
+
+Parsing messages inform you about transformations the filter made to your input format.
+These are always reported because they affect the structure of the returned data.
+Debug warnings help you understand which fields were filtered out during development.
 
 =head1 WILDCARD SUPPORT
 
