@@ -80,9 +80,17 @@ This module is useful when you have:
 
 =over 4
 
-=item * Pre-defined filter rules (from config files, constants, database schemas)
+=item * Known parameters for downstream input or processes (API calls, method/subroutine arguments, database operations)
 
-=item * Known downstream input or process parameters (for APIs, method/subroutine arguments, database operations)
+=over 8
+
+=item * Fields that must be provided for success downstream (“required”) 
+
+=item * Fields useful downstream if provided (“accepted”) 
+
+=item * Fields to remove before further processing (“excluded”) 
+
+=back
 
 =item * Incoming data from differing sources (web forms, APIs, databases, user input)
 

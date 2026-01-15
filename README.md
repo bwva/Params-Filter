@@ -21,12 +21,13 @@ This approach handles common parameter issues:
 
 This module is useful when you have:
 
-- Pre-defined filter rules (from config files, constants, database schemas)
-- Known downstream input or process parameters (for APIs, method/subroutine arguments, database operations)
+- Known parameters for downstream input or processes (API calls, method/subroutine arguments, database operations)
+    - Fields that must be provided for success downstream (“required”) 
+    - Fields useful downstream if provided (“accepted”)
+    - Fields to remove before further processing (“excluded”) 
 - Incoming data from differing sources (web forms, APIs, databases, user input)
 - No guarantee that incoming data is consistent or complete
-- Need to process multiple datasets with the same rules
-- Want to reject unwanted fields before value validation
+- Multiple datasets to process with the same rules
 
 ### When NOT to Use This Module
 
