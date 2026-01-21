@@ -8,7 +8,8 @@ use Params::Filter;
 
 ok(1, 'Module loaded successfully');
 
-# Test that filter function is exported
+# Test that filter function is available for explicit import
+use Params::Filter qw/filter/;
 can_ok('main', 'filter');
 
 # Test that new_filter method exists

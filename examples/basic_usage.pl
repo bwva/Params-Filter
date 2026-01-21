@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 use v5.40;
-use Params::Filter;
+use Params::Filter qw/filter/;
 
 # Basic usage example: Simple form filtering
 # Demonstrates required + accepted fields

@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 use v5.40;
-use Params::Filter;
+use Params::Filter qw/filter/;
 
 # Debug Mode Example: Development-time warnings for edge cases
 # Debug mode helps catch potential issues during development
@@ -101,7 +101,7 @@ say "  $msg5";
 
 say "\n--- Example 6: OO Interface with Debug Mode ---\n";
 
-my $debug_filter = Local::Params::Strictly->new_filter({
+my $debug_filter = Params::Filter->new_filter({
     required => ['id'],
     accepted => ['name', 'value'],
     excluded => ['secret', 'temp'],

@@ -8,7 +8,7 @@ Params::Filter - Fast field filtering for parameter construction
 
 =head1 SYNOPSIS
 
-    use Params::Filter;
+    use Params::Filter	qw/filter/;    # import filter() subroutine
 
     # Define filter rules
     my @required_fields = qw(name email);
@@ -29,7 +29,7 @@ Params::Filter - Fast field filtering for parameter construction
         process_user($filtered_data);
     } else {
         # Error - missing required fields
-        die "Validation failed: $status";
+        die "Filtering failed: $status";
     }
 
     # Object-oriented interface
@@ -47,7 +47,7 @@ Params::Filter - Fast field filtering for parameter construction
 =head1 DESCRIPTION
 
 C<Params::Filter> provides fast, lightweight parameter filtering that
-checks only for the presence or absence of specified fields. It does B<not>
+checks only for the presence or absence of specified fields. It does B<NOT>
 validate values - no type checking, truthiness testing, or lookups.
 
 This module separates field filtering from value validation:
@@ -70,7 +70,7 @@ This approach handles common parameter issues:
 
 =item * Validation may not catch missing inputs quickly enough
 
-=item * The number of fields to check multiplies validation time
+=item * Many fields to check multiplies validation time
 
 =back
 
@@ -84,65 +84,61 @@ This module is useful when you have:
 
 =over 8
 
-=item * Fields that must be provided for success downstream (“required”) 
+=item * Fields that must be provided for success downstream ("required")
 
-=item * Fields useful downstream if provided (“accepted”) 
+=item * Fields useful downstream if provided ("accepted")
 
-=item * Fields to remove before further processing (“excluded”) 
+=item * Fields to remove before further processing ("excluded")
 
 =back
 
-=item * Incoming data from differing sources (web forms, APIs, databases, user input)
+=item * Incoming data from external sources (web forms, APIs, databases, user input)
 
 =item * No guarantee that incoming data is consistent or complete
 
-=item * Need to process multiple datasets with the same rules
+=item * Multiple data instances to process with the same rules
 
-=item * Want to reject unwanted fields before value validation
+=item * Multiple uses tapping incoming data
+
+=item * A distinction between missing and "false" data
 
 =back
 
 =head2 When NOT to Use This Module
 
-If you're constructing both the filter rules B<and> the data structure at the
-same point in your code, you probably don't need this module except 
-during development or debugging. The module's expected use is 
-to apply pre-defined rules to data that may be inconsistent or 
-incomplete for its intended use. If there isn't repetition 
-or an unreliable data structure, this might be overkill.
+If you're constructing both the filter rules B<and> the data structure
+at the same point in your code, you probably don't need this module.
+The module's expected use is to apply pre-defined rules to data that
+may be inconsistent or incomplete for its intended use.
+If there isn't repetition or an unknown/unreliable data structure, this might be overkill.
 
 =cut
 
 =head2 This Module Does NOT Do Fancy Stuff
 
-As much as this module attempts to be versatile in usage, there are some 
-B<very handy affordances it does NOT provide:>
+As much as this module attempts to be versatile in usage, there are some B<VERY HANDY AFFORDANCES IT DOES NOT PROVIDE:>
 
 =over 4
 
 =item * No regex field name matching for designating fields to require, accept, or exclude
 
-=item * No conditional field designations within a filter:
-    C<if 'mailing_address' require 'postal_code'>.
-But see C<set_required()>, C<set_accepted()>, C<set_excluded()>, 
-as ways to adjust a filter's behavior - or just have alternative filters.
+=item * No conditional field designations I<within> a filter:
+
+    C<if 'mailing_address' require 'postal_code'>   # No way a filter can do this
 
 =item * No coderefs or callbacks for use when filtering
 
 =item * No substitutions or changes to field names
 
-=item * No built-in filter lists except null [] = none
+=item * No built-in filter lists except null C<[]> = none
 
-=item * No fields B<added> to data, EXCEPT:
+=item * No fields ADDED to yielded data, EXCEPT:
 
-=over8
+=over 8
 
-* If the provided data resolves to a list or array with an odd number of elements, 
-    the LAST element is treated as a flag, set to the value 1
+=item * If the provided data resolves to a list or array with an odd number of elements, the LAST element is treated as a flag, set to the value 1
 
-* If the provided data resolves to a single non-reference scalar (probably a text string) 
-    the data is stored as a hashref value with the key ‘_’, and returned if '_' is
-    included in the `accepted` list or the list is set to `['*']` (accept all)
+=item * If the provided data resolves to a single non-reference scalar (probably a text string) the data is stored as a hashref value with the key C<'_'>, and returned if C<'_'> is included in the accepted list or the list is set to C<['*']> (accept all)
 
 =back
 
@@ -152,7 +148,8 @@ as ways to adjust a filter's behavior - or just have alternative filters.
 
 use Exporter;
 our @ISA		= qw{ Exporter  };
-our @EXPORT		= qw{ filter };
+our @EXPORT		= qw{  };
+our @EXPORT_OK	= qw{ filter };
 
 sub new_filter {
 	my ($class,$args) = @_;
@@ -303,81 +300,80 @@ sub apply {
 
 =head1 MODIFIER METHODS
 
-Modifier methods allow dynamic configuration of filter rules after creation of the filter object.
-All methods return C<$self> for method chaining. 
+The OO interface provides methods to modify a filter's configuration after creation.
+
+=head2 Modifier Methods for Dynamic Configuration
+
+The OO interface provides methods to modify a filter's configuration after creation.
+
+    # Start with an empty filter (rejects all by default)
+    my $filter = Params::Filter->new_filter();
+
+    # Configure it in steps as needed
+    $filter->set_required(['id', 'name']);
+    # later:
+    $filter->set_accepted(['email', 'phone'])
+    $filter->set_excluded(['password']);
+
+=head3 Available Modifier Methods
+
+=over 4
+
+=item * **C<set_required(\@fields | @fields)>** - Set required fields (accepts arrayref or list)
+
+=item * **C<set_accepted(\@fields | @fields)>** - Set accepted fields (accepts arrayref or list)
+
+=item * **C<set_excluded(\@fields | @fields)>** - Set excluded fields (accepts arrayref or list)
+
+=item * **C<accept_all()>** - Convenience method: sets accepted to C<['*']> (wildcard mode)
+
+=item * **C<accept_none()>** - Convenience method: sets accepted to C<[]> (reject all extras)
+
+=back
+
+=head2 Important Behavior Notes
+
+B<Empty Modifier Calls Set Empty Arrays:>
+
+If no fields are provided to C<set_required()>, C<set_accepted()>, or C<set_excluded()>, the respective list is set to an empty array C<[]>:
+
+    $filter->set_accepted();  # Sets accepted to `[]`
+    # Result: Only required fields will be accepted (extras rejected)
+
+B<Method Chaining:>
+
+All modifier methods return C<$self> for chaining:
+
+    $filter->set_required(['id'])
+            ->set_accepted(['name'])
+            ->accept_all();  # Overrides set_accepted
+
+B<Mutability:>
+
 A filter may call its modifier methods more than once, and the changes take effect immediately.
 
-=head2 set_required
+=head2 Meta-Programming Use Cases
 
-    $filter->set_required(['id', 'name', 'email']);  # Arrayref
-    $filter->set_required('id', 'name', 'email');    # List
-    $filter->set_required();                         # Clears to []
-
-Sets the required field names. Accepts either an arrayref or a list of
-field names. Calling with no arguments sets required to empty array.
-
-=head2 set_accepted
-
-    $filter->set_accepted(['phone', 'city']);  # Arrayref
-    $filter->set_accepted('phone', 'city');    # List
-    $filter->set_accepted();                   # Clears to []
-    $filter->set_accepted(['*']);              # Accept all (except excluded)
-
-Sets the optional (accepted) field names. Accepts either an arrayref or a
-list of field names. Calling with no arguments sets accepted to empty array.
-
-=head2 set_excluded
-
-    $filter->set_excluded(['password', 'ssn']);  # Arrayref
-    $filter->set_excluded('password', 'ssn');    # List
-    $filter->set_excluded();                     # Clears to []
-
-Sets the excluded field names (fields to always remove). Accepts either an
-arrayref or a list of field names. Calling with no arguments sets excluded
-to empty array.
-
-=head2 accept_all
-
-    $filter->accept_all();  # Sets accepted to ['*']
-
-Convenience method that sets accepted fields to C<['*']> (wildcard mode),
-allowing all fields except those in excluded.
-
-=head2 accept_none
-
-    $filter->accept_none();  # Sets accepted to []
-
-Convenience method that sets accepted fields to C<[]> (empty array),
-allowing only required fields.
-
-=head3 Modifier Method Examples
-
-    # Method chaining for one-liner configuration
-    my $filter = Params::Filter->new_filter();
-    # When needed:
-    $filter->set_required(['id', 'name'])
-        ->set_accepted(['email', 'phone'])
-        ->set_excluded(['password']);
+These methods enable dynamic configuration for conditional scenarios:
 
     # Environment-based configuration
     my $filter = Params::Filter->new_filter();
 
     if ($ENV{MODE} eq 'production') {
-        $filter->set_required(['api_key'])
+        $filter->set_required(['api_key', 'endpoint'])
               ->set_accepted(['timeout', 'retries'])
               ->set_excluded(['debug_info']);
-    } else {
+    }
+    else {
         $filter->set_required(['debug_mode'])
               ->accept_all();
     }
 
-    # Dynamic configuration from config file
-    if ( $DEBUG ) {
-        my $db_config = load_config('debug_fields.json');
-        $filter->set_required($db_config->{required})
-          ->set_accepted($db_config->{accepted})
-          ->set_excluded($db_config->{excluded});
-    }
+    # Dynamic field lists from config
+    my $config_fields = load_config('fields.json');
+    $filter->set_required($config_fields->{required})
+          ->set_accepted($config_fields->{accepted})
+          ->set_excluded($config_fields->{excluded});
 
 =head1 FUNCTIONAL INTERFACE
 
@@ -571,47 +567,304 @@ sub filter ($args,$req,$ok=[],$no=[],$db=0) {
 	return wantarray ? ( $filtered, $return_msg ) : $filtered;
 }
 
+=head1 INPUT PARSING
+
+The C<filter()> function parses multiple common input formats into a consistent internal structure. This flexibility allows you to use the module with data from differing sources such as form input, arguments to subroutines/methods, fetched database records, and test input, without pre-processing.
+
+=head2 Supported Input Formats
+
+=head3 1. Hashref (Most Common)
+
+##### Uses the hashref's key-value pairs as provided
+
+    # External data source (e.g., from web form, API, or database)
+    my $incoming_user = { name => 'Alice', email => 'alice@example.com', phone => '555-1234' };
+
+    # Apply filter with rules defined inline
+    my ($result, $msg) = filter(
+        $incoming_user,
+        ['name', 'email'],
+        ['phone'],
+    );
+    # Result: { name => 'Alice', email => 'alice@example.com', phone => '555-1234' }
+
+=head3 2. Arrayref with Even Number of Elements
+
+##### Makes key-value pairs from arrayref elements, reading left to right
+
+    # Pre-defined filter rules (typically defined at package level or in config)
+    my @required_fields = qw(name email);
+    my @accepted_fields = qw(age);
+
+    # External data from command-line arguments or similar list source
+    my @cli_args = ('name', 'Bob', 'email', 'bob@example.com', 'age', 30);
+
+    my ($result, $msg) = filter(
+        \@cli_args,
+        \@required_fields,
+        \@accepted_fields,
+    );
+    # Result: { name => 'Bob', email => 'bob@example.com', age => 30 }
+
+=head3 3. Arrayref with Odd Number of Elements
+
+##### Makes key-value pairs from arrayref elements, reading left to right, but when an array has an odd number of elements, the last element (right-most) becomes a flag assigned the value C<1>:
+
+    # Pre-defined filter configuration
+    my @required = qw(name);
+    my @accepted = qw(verbose force);
+
+    # External data with odd number of elements (e.g., CLI args with flags)
+    my $command_args = ['name', 'Charlie', 'verbose', 'debug', 'force'];
+
+    my ($result, $msg) = filter(
+        $command_args,
+        \@required,
+        \@accepted,
+        [], 1,  # Debug mode to see warning
+    );
+    # Result: { name => 'Charlie', verbose => 'debug', force => 1 }
+    # Message includes: "Odd number of arguments provided; last element 'force' treated as flag"
+
+=head3 4. Arrayref with Hashref as First Element
+
+##### Uses the hashref's key-value pairs as provided, ignores rest of arrayref
+
+    # Pre-configured filter
+    my @required = qw(name);
+    my @accepted = qw(age title);
+
+    # External data source with hashref wrapped in array
+    my $arg0    = { name => 'Diana', age => 25, hire_date => 2026-01-09, title => 'CTO' };
+    my $arg1    = $something;
+    my $arg2    = $something_else;
+
+    my $api_response = [ $arg0, $arg1, $arg2, ];
+    my ($result, $msg) = filter(
+        $api_response,
+        \@required,
+        \@accepted,
+    );
+    # Result: { name => 'Diana', age => 25, title => 'CTO' }
+
+=head3 5. Single-Element Arrayref
+
+##### Creates a hashref with the element as the value and '_' as its key.
+To make use of this feature, C<'_'> or the wildcard C<'*'> must be included in the appropriate filter lists.
+
+    # Filter configuration accepting special '_' key
+    my @required = ();
+    my @accepted = qw(_);
+
+    # External data: single-element array
+    my $single_value = ['search_query'];
+
+    my ($result, $msg) = filter(
+        $single_value,
+        \@required,
+        \@accepted,
+    );
+    # Result: { _ => 'search_query' }
+
+=head3 6. Plain Scalar (String)
+
+##### Creates a hashref with the scalar as the value and '_' as its key.
+To make use of this feature, C<'_'> or the wildcard C<'*'> must be included in the appropriate filter lists.
+
+Note: No attempt is made to parse strings into data.
+
+    # Pre-configured filter setup
+    my @required = ();
+    my @accepted = qw(_);
+
+    # External scalar data (e.g., raw input from file or stream)
+    my $raw_input = 'plain text string';
+
+    my ($result, $msg) = filter(
+        $raw_input,
+        \@required,
+        \@accepted,
+        [], 1,  # Debug mode to see warning
+    );
+    # Result: { _ => 'plain text string' }
+    # Message includes: "Plain text argument accepted with key '_': 'plain text string'"
+
+=head3 7. List Passed as Arrayref
+
+##### Flattened key-value lists must be wrapped in an arrayref
+
+    # Filter rules defined once, reused
+    my @req_fields = qw(name email);
+    my @acc_fields = qw(city);
+
+    # External key-value list data must be wrapped in arrayref
+    my ($result, $msg) = filter(
+        [name => 'Eve', email => 'eve@example.com', city => 'Boston'],
+        \@req_fields,
+        \@acc_fields,
+    );
+    # Result: { name => 'Eve', email => 'eve@example.com', city => 'Boston' }
+
+=head2 Special Parsing Keys
+
+=head3 The C<'_'> Key
+
+- Used for scalar input and single-element arrays
+- Must be in accepted list or use wildcard C<['*']>
+- Stores non-reference data that doesn't fit the hashref pattern
+
+=head2 Parsing Status Messages (Always Provided)
+
+These messages appear in the status message to inform you about structural transformations:
+
+=over 4
+
+=item * **Odd array elements**: C<"Odd number of arguments provided; last element 'X' treated as flag">
+
+=item * **Scalar input**: C<"Plain text argument accepted with key '_': 'preview...'">
+
+=item * **Single array element**: C<"Plain text argument accepted with key '_': 'preview...'">
+
+=back
+
+These messages help you understand when your input format differs from the standard hashref.
+
 =head1 RETURN VALUES
 
-Both L</filter> and L</apply> return different values depending on context:
+Both L</filter> and L</apply> return data in a consistent format, regardless
+of how the input was provided. The returned result's structure depends on context.
+
+=head2 Return Structure
+
+=head3 Scalar Context
+
+    # Pre-defined filter rules
+    my @required = qw(name);
+    my @accepted = qw(email);
+
+    # External input data
+    my $input = { name => 'Alice', email => 'alice@example.com' };
+
+    my $result = filter($input, \@required, \@accepted);
+    # Returns: hashref or undef on failure
+    if ($result) {
+        say $result->{name};
+    }
+
+=head3 List Context (Recommended)
+
+    # Filter configuration
+    my @required = qw(name email);
+    my @accepted = qw(phone);
+
+    # External data source
+    my $input = get_external_data();  # e.g., from API, web form, etc.
+
+    my ($data, $message) = filter($input, \@required, \@accepted);
+    # Returns: (hashref, status_message) or (undef, error_message)
+    if ($data) {
+        say $data->{name};
+    } else {
+        say "Error: $message";
+    }
 
 =head2 Success
 
-=over 4
+On success, returns a hashref containing only the fields that passed filtering:
 
-=item * List context: C<(hashref, "Admitted")> or C<(hashref, warning_message)>
+    # Pre-configured filter rules
+    my @required_fields = qw(name email);
+    my @accepted_fields = qw(phone);
+    my @excluded_fields = qw(password spam);
 
-=item * Scalar context: Hashref with filtered parameters
+    # External data source (e.g., web form submission)
+    my $web_form_data = {
+        name     => 'Alice',
+        email    => 'alice@example.com',
+        password => 'secret',
+        spam     => 'yes'
+    };
 
-=back
+    my ($user, $msg) = filter(
+        $web_form_data,
+        \@required_fields,
+        \@accepted_fields,
+        \@excluded_fields,
+    );
+
+    # $user = { name => 'Alice', email => 'alice@example.com' }
+    # $msg = "Admitted"
+
+    # Notes:
+    # - 'name' and 'email' included (required and present)
+    # - 'password' and 'spam' excluded (removed even if present)
+    # - 'phone' not in input, so not included
+    # - 'spam' not in required/accepted, so ignored
 
 =head2 Failure
 
+On failure (missing required fields), returns C<undef> and an error message:
+
+    # Filter rules defined once, reused
+    my @required = qw(name email);
+    my @accepted = qw(phone);
+
+    # Incomplete external data
+    my $incomplete_data = { name => 'Bob' };  # email missing!
+
+    my ($data, $msg) = filter(
+        $incomplete_data,
+        \@required,
+        \@accepted,
+    );
+
+    # $data = undef
+    # $msg = "Unable to initialize without required arguments: 'email'"
+
+=head2 Status Message Types
+
+The status message provides feedback about the filtering operation:
+
 =over 4
 
-=item * List context: C<(undef, error_message)>
+=item * 1. **"Admitted"** - Success, all required fields present
 
-=item * Scalar context: C<undef>
+=item * 2. **"Unable to initialize without required arguments: 'field1', 'field2'"** - Failure, missing required fields
+
+=item * 3. **Parsing messages** - Information about input format transformations (always provided)
+
+=item * 4. **Debug warnings** - Information about excluded/unrecognized fields (provided in debug mode only)
 
 =back
 
-=head2 Common Status Messages
+=head2 Consistent Output Format
 
-=over 4
+B<Regardless of input format, output is always a hashref:>
 
-=item * "Admitted" - All required fields present, filtering successful
+    # Filter rules (could be pre-defined constants)
+    my @req1 = qw(name);
+    my @acc1 = qw();
 
-=item * "Plain text argument accepted with key '_': '...'" - Parsing message (always shown)
+    # Hashref input → hashref output
+    my $hash_input = { name => 'Alice' };
+    my $result1 = filter($hash_input, \@req1, \@acc1);
+    # → { name => 'Alice' }
 
-=item * "Odd number of arguments provided; last element 'X' converted to flag with value 1" - Parsing message (always shown)
+    # Arrayref input → hashref output
+    my @req2 = qw(name);
+    my @acc2 = qw(age);
+    my $array_input = ['name', 'Bob', 'age', 30];
+    my $result2 = filter($array_input, \@req2, \@acc2);
+    # → { name => 'Bob', age => 30 }
 
-=item * "Ignoring excluded arguments: 'field1', 'field2'..." - Debug message (debug mode only)
+    # Scalar input → hashref output with '_' key
+    my @req3 = qw();
+    my @acc3 = qw(_);
+    my $scalar_input = 'text';
+    my $result3 = filter($scalar_input, \@req3, \@acc3);
+    # → { _ => 'text' }
 
-=item * "Ignoring unrecognized arguments: 'field1', 'field2'..." - Debug message (debug mode only)
-
-=item * "Unable to initialize without required arguments: 'field1', 'field2'..." - Error
-
-=back
+This consistency makes the filtered data easy to use in downstream code without worrying about the original input format.
 
 =head1 FEATURES
 
@@ -677,19 +930,20 @@ Debug warnings help you understand which fields were filtered out during develop
 
 =head1 WILDCARD SUPPORT
 
-The C<accepted> parameter supports a wildcard C<'*'> to accept all fields
-(except those in C<excluded>).
-
-=head2 Wildcard Usage
+=head2 Wildcard for Accepting Fields
 
     # Accept all fields
     filter($input, [], ['*']);
 
-    # Accept all except specific exclusions
+    # Accept all fields except specific exclusions
     filter($input, [], ['*'], ['password', 'ssn']);
 
     # Required + all other fields
     filter($input, ['id', 'name'], ['*']);
+
+    # Wildcard can appear anywhere in accepted list
+    filter($input, [], ['name', 'email', '*']);  # debugging: add '*' to see everything
+    filter($input, [], ['*', 'phone', 'address']);
 
 =head2 Important Notes
 
@@ -717,28 +971,12 @@ A common debugging pattern is to add C<'*'> to an existing accepted list:
     # Debugging - see all inputs
     filter($input, ['id'], ['name', 'email', '*']);
 
-Or, start with minimum to troubleshoot specific fields
-
-    filter($input, ['id'], []);
-
-    # then
-    filter($input, ['id'], ['name']);
-
-    # then
-    filter($input, ['id'], ['email']);
-
-    # then
-    filter($input, ['id'], ['name', 'email']);
-
-    # then
-    filter($input, ['id'], ['*']);
-
 
 =head1 EXAMPLES
 
-=head2 Basic Form Validation
+=head2 Form Field Filtering
 
-    use Params::Filter;    # auto-imports filter() subroutine
+    use Params::Filter	qw/filter/;    # import filter() subroutine
 
     # Define filtering rules (could be from config file)
     my @required = qw(name email);
@@ -816,42 +1054,53 @@ Or, start with minimum to troubleshoot specific fields
 
 =head2 Data Segregation for Multiple Subsystems
 
-A common pattern is splitting incoming data into subsets for different
-handlers or storage locations. Each filter extracts only the fields needed
-for its specific purpose, implementing security through compartmentalization.
+B<Complex Data Flows>
 
-    # Main subscription form collects: 
-    #  name, email, zip, 
-    #  user_id, password, credit_card_number, subscription_term
+An application may need to handle incoming data from varying sources and prepare it for the same downstream processing. Filtering rules can be tailored to assure that only usable data is passed on.
 
-    # Subscriber profile form collects: 
-    #  name, email, address, city, state, zip, 
-    #  user_id, password, credit_card_number, 
-    #  phone, occupation, position, education 
+An application may need to split incoming data into subsets for different handlers or storage locations. Multiple filters may be applied to a given input, and each filter extracts only the fields needed for its specific purpose, simplifying next steps and improving security through compartmentalization.
+
+This example demonstrates how Params::Filter can integrate incoming data and segregate the yielded data for multiple outputs.
+
+    # Three different Subscription forms collect overlapping data:
+
+    #  Main subscription signup form collects:
+    #   name, email, zip,
+    #   user_id, password, credit_card_number, subscription_term
+
+    #  Subscription form with full profile collects:
+    #  name, email, address, city, state, zip,
+    #  user_id, password, credit_card_number, subscription_term,
+    #  phone, occupation, position, education
     #  alt_card_number, billing_address, billing_zip
 
-    # Promo subscription form collects: 
-    #  name, email, zip, subscription_term, 
+    #  Promo subscription form collects:
+    #  name, email, zip, subscription_term,
     #  user_id, password, credit_card_number, promo_code
 
     my $data = $webform->input(); # From any of the above
 
-    # Filters
-    # Personal data - general user info (no sensitive data)
+    # Three different uses for the data:
+    #  Personal contact info to be stored
+    #  Subscription business to be transacted
+    #  Authentication credentials to be encrypted and stored
+
+    # Personal data filter - general user info (no sensitive data)
     my $person_filter = Params::Filter->new_filter({
         required => ['name', 'user_id', 'email'],
-        accepted => ['address', 'city', 'state', 'zip', 'phone', 'occupation', 'position', 'education'],
+        accepted => ['address', 'city', 'state', 'zip', 'phone',
+                     'occupation', 'position', 'education'],
         excluded => ['password', 'credit_card_number'],
     });
 
-    # Business data - subscription and billing info
+    # Business data filter - subscription and billing info
     my $biz_filter = Params::Filter->new_filter({
-        required => ['user_id', 'subscription_term', 'credit_card_number', 'zip'],
+        required => ['user_id', 'name', 'subscription_term', 'credit_card_number', 'zip'],
         accepted => ['alt_card_number', 'billing_address', 'billing_zip', 'promo_code'],
         excluded => ['password'],
     });
 
-    # Authentication data - only credentials
+    # Authentication data filter - only credentials
     my $auth_filter = Params::Filter->new_filter({
         required => ['user_id', 'password'],
         accepted => [],
@@ -859,31 +1108,23 @@ for its specific purpose, implementing security through compartmentalization.
     });
 
     # Apply all filters to the same web form submission
-    my ($person_data, $pmsg) = $person_filter->apply($data);
-    my ($biz_data,    $bmsg) = $biz_filter->apply($data);
-    my ($auth_data,   $amsg) = $auth_filter->apply($data);
+    my ($person_data,     $pmsg) = $person_filter->apply($data);
+    my ($biz_data,        $bmsg) = $biz_filter->apply($data);
+    my ($auth_data,       $amsg) = $auth_filter->apply($data);
 
+    # Set the requirement that all filtering requirements must be met
+    # with data provided by any of the three webform sources:
     unless ($person_data && $biz_data && $auth_data) {
-        return "Unable to add user: " .
-            join ' ' => grep { $_ ne 'Admitted' } ($pmsg, $bmsg, $amsg);
+      return "Unable to add user: " .
+        join ' ' => grep { $_ ne 'Admitted' } ($pmsg, $bmsg, $amsg);
     }
 
-    # Collect any debug warnings from successful filters
-    if ($self->{DEBUG}) {
-        my @warnings = grep { $_ ne 'Admitted' } ($pmsg, $bmsg, $amsg);
-        warn "Params filter debug warnings:\n" . join("\n", @warnings) . "\n"
-            if @warnings;
-    }
+    # Route each filtered data subset to appropriate handler
+    $self->add_user(         $person_data   );    # User profile
+    $self->set_subscription( $biz_data      );    # Billing system
+    $self->set_password(     $auth_data     );    # Auth system
 
-    # Route each subset to appropriate handler
-    $self->add_user($person_data);           # User profile
-    $self->set_subscription($biz_data);       # Billing system
-    $self->set_password($auth_data);          # Auth system
-
-    # continue ...
-B<Note>: The original C<$data> is not modified by any filter. Each call to
-C<apply()> creates its own internal copy, so the same data can be safely
-processed by multiple filters.
+B<Note>: The original C<$data> is not modified during filtering, so the same data can be safely processed by multiple filters.
 
 =head1 SEE ALSO
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 use v5.40;
-use Params::Filter;
+use Params::Filter qw/filter/;
 
 # Edge Cases Example: Unusual input formats and boundary conditions
 
@@ -22,7 +22,7 @@ my ($result2, $msg2) = filter(
     ['config', 'production', 'verbose'],  # 3 elements - odd!
     ['config'],
     ['verbose'],
-    [], [], 1,  # DEBUG ON to see warning
+    [], 1,  # DEBUG ON to see warning
 );
 
 say "Odd array (3 elements):";
@@ -47,7 +47,7 @@ my ($result4, $msg4) = filter(
     'plain text value',  # Not a reference!
     [],
     ['_'],
-    [], [], 1,  # DEBUG ON
+    [], 1,  # DEBUG ON
 );
 
 say "Scalar input:";
@@ -61,7 +61,7 @@ my ($result5, $msg5) = filter(
     $long_string,
     [],
     ['_'],
-    [], [], 1,  # DEBUG ON
+    [], 1,  # DEBUG ON
 );
 
 say "Long scalar input (truncated in warning):";
@@ -164,7 +164,7 @@ say "  Status: $msg12\n";
 
 say "--- Case 12: OO Interface with Edge Cases ---\n";
 
-my $filter = Local::Params::Strictly->new_filter({
+my $filter = Params::Filter->new_filter({
     required => ['id'],
     accepted  => ['*'],  # Wildcard
     excluded  => ['secret'],

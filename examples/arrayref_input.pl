@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 use v5.40;
-use Params::Filter;
+use Params::Filter qw/filter/;
 
 # Arrayref Input Example: Using array references instead of hash references
 # Useful for command-line arguments or list-based data
@@ -34,7 +34,7 @@ my ($result2, $msg2) = filter(
     ],
     ['command', 'env'],
     ['verbose'],
-    [], [], 1,  # Debug ON to see warning
+    [], 1,  # Debug ON to see warning
 );
 
 say "Odd-element arrayref (verbose becomes flag):";
@@ -68,7 +68,7 @@ my ($result4, $msg4) = filter(
     \@argv,
     ['user', 'action'],
     ['force'],
-    [], [], 1,
+    [], 1,
 );
 
 say "Command-line style array:";
@@ -86,7 +86,7 @@ my ($result5, $msg5) = filter(
     ],
     ['product_id'],
     ['price', 'in_stock', 'active'],
-    [], [], 1,
+    [], 1,
 );
 
 say "Mixed data types:";
@@ -137,7 +137,7 @@ say "  Status: $msg7\n";
 
 say "--- Format 8: OO Interface with Arrayrefs ---\n";
 
-my $array_filter = Local::Params::Strictly->new_filter({
+my $array_filter = Params::Filter->new_filter({
     required => ['id', 'type'],
     accepted  => ['name', 'value', 'enabled'],
 });

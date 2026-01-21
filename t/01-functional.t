@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use Test2::V0;
-use Params::Filter;
+use Params::Filter qw/filter/;
 
 # Functional Interface Tests
 

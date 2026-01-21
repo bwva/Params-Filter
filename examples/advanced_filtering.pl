@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 use v5.40;
-use Params::Filter;
+use Params::Filter qw/filter/;
 
 # Advanced Filtering Example: Complex combinations of required, accepted, excluded
 # Demonstrates sophisticated filtering and filtering patterns
@@ -57,7 +57,7 @@ say "  Status: $msg2\n";
 say "--- Pattern 3: API Request Filtering ---\n";
 
 # API endpoint: create user with public and internal fields
-my $api_filter = Local::Params::Strictly->new_filter({
+my $api_filter = Params::Filter->new_filter({
     required => ['username', 'email'],
     accepted  => ['*'],  # Accept everything else
     excluded  => ['is_admin', 'role', 'permissions', 'banned'],  # Security-critical
@@ -129,7 +129,7 @@ sub filter_user_input {
         push $rules->{excluded}->@*, 'role', 'permissions', 'admin_notes';
     }
 
-    my $filter = Local::Params::Strictly->new_filter($rules);
+    my $filter = Params::Filter->new_filter($rules);
     return $filter->apply($input);
 }
 
@@ -218,8 +218,8 @@ my %field_map = (
 );
 
 my $mapped = {
-    $field_map{$_} || $_ => $raw->{$_}
-    for keys $raw->%*
+    map { $field_map{$_} || $_ => $raw->{$_} }
+    keys $raw->%*
 };
 
 say "Field mapping after filtering:";

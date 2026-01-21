@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 use v5.40;
-use Params::Filter;
+use Params::Filter qw/filter/;
 
 # Error Handling Example: Filtering failures and how to handle them
 
@@ -63,7 +63,7 @@ if ($data) {
 # Pattern 3: OO Interface with error handling
 say "\n--- Pattern 3: OO Interface Error Handling ---\n";
 
-my $filter = Local::Params::Strictly->new_filter({
+my $filter = Params::Filter->new_filter({
     required => ['product_id', 'quantity'],
     accepted => ['price', 'description'],
 });
@@ -78,7 +78,7 @@ my @orders = (
 for my $order (@orders) {
     my ($filtered, $msg) = $filter->apply($order);
 
-    if ($validated) {
+    if ($filtered) {
         my $fields = join ', ', sort keys $filtered->%*;
         say "  ✓ Order valid: $fields";
     } else {
@@ -124,7 +124,7 @@ say "  Result: $message2";
 # Pattern 5: Collecting multiple filtering errors
 say "\n--- Pattern 5: Batch Filtering ---\n";
 
-my $batch_filter = Local::Params::Strictly->new_filter({
+my $batch_filter = Params::Filter->new_filter({
     required => ['id', 'type'],
     accepted => ['name', 'value'],
 });
@@ -141,8 +141,8 @@ my (@valid, @invalid);
 for my $item (@batch_data) {
     my ($filtered, $msg) = $batch_filter->apply($item);
 
-    if ($validated) {
-        push @valid, $validated;
+    if ($filtered) {
+        push @valid, $filtered;
     } else {
         push @invalid, { input => $item, error => $msg };
     }

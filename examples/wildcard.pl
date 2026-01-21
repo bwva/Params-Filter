@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 use v5.40;
-use Params::Filter;
+use Params::Filter qw/filter/;
 
 # Wildcard Example: Using '*' to accept all remaining fields
 # Useful when you want required fields but allow any additional data
@@ -54,7 +54,7 @@ say "  Status: $log_status\n";
 
 say "=== Example 3: OO Interface with Wildcard ===\n";
 
-my $flexible_filter = Local::Params::Strictly->new_filter({
+my $flexible_filter = Params::Filter->new_filter({
     required => ['id'],
     accepted => ['*'],  # Accept any additional fields
     excluded => ['password', 'token', 'secret'],
