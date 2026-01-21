@@ -1,5 +1,27 @@
 Revision history for Params-Filter
 
+v0.006  2026-01-20 (STABLE RELEASE)
+    - First stable CPAN release
+    - Major documentation improvements:
+      - Updated POD to match README structure and clarity
+      - Improved DESCRIPTION section with clearer "When to Use" guidance
+      - Enhanced INPUT PARSING section with numbered formats and better examples
+      - Enhanced RETURN VALUES section with clearer structure
+      - Improved MODIFIER METHODS documentation with important behavior notes
+      - Improved WILDCARD SUPPORT section
+      - Enhanced EXAMPLES section with complex data flows
+    - Fixed bug in example code (extra empty arrayref argument to filter())
+      - Fixed in examples/arrayref_input.pl (3 instances)
+      - Fixed in examples/edge_cases.pl (3 instances)
+      - Fixed in README.md (2 instances)
+      - Fixed in lib/Params/Filter.pm POD (2 instances)
+    - Fixed syntax error in examples/advanced_filtering.pl (hashref construction)
+    - Replaced problematic examples/strict_construction_test.pl with proper
+      examples/strict_construction.pl (educational example, no external dependencies)
+    - All 11 example scripts tested and working correctly
+    - All 59 tests passing
+    - Ready for production use
+
 v0.6_002 2026-01-14 (DEVELOPER RELEASE)
     - Improved message consistency: separated parsing messages from debug warnings
     - Parsing messages (always shown): plain text args, odd array elements

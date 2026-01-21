@@ -7,7 +7,7 @@ examples/edge_cases.pl
 examples/error_handling.pl
 examples/modifier_methods.pl
 examples/oo_interface.pl
-examples/strict_construction_test.pl
+examples/strict_construction.pl
 examples/wildcard.pl
 lib/Params/Filter.pm
 Makefile.PL
