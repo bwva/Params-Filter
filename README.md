@@ -277,7 +277,7 @@ my $incoming_user = { name => 'Alice', email => 'alice@example.com',
 my ($result, $msg) = filter(
     $incoming_user,
     ['name', 'email'],
-    ['phone'],
+    ['phone', 'text_ok'],
     ['UTM']
 );
 # Result: { name => 'Alice', email => 'alice@example.com', phone => '555-1234' }
