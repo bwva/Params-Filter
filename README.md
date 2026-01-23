@@ -269,13 +269,16 @@ The `filter()` function parses multiple common input formats into a consistent i
 
 ```perl
 # External data source (e.g., from web form, API, or database)
-my $incoming_user = { name => 'Alice', email => 'alice@example.com', phone => '555-1234' };
+my $incoming_user = { name => 'Alice', email => 'alice@example.com',
+ phone => '555-1234', UTM => "...", referred_by => 'Bob'
+};
 
 # Apply filter with rules defined inline
 my ($result, $msg) = filter(
     $incoming_user,
     ['name', 'email'],
     ['phone'],
+    ['UTM']
 );
 # Result: { name => 'Alice', email => 'alice@example.com', phone => '555-1234' }
 ```
