@@ -1,10 +1,12 @@
 package Params::Filter;
 use v5.36;
-our $VERSION = '0.007';
+our $VERSION = '0.009';
 
 =head1 NAME
 
 Params::Filter - Fast field filtering for parameter construction
+
+=encoding utf-8
 
 =head1 SYNOPSIS
 
