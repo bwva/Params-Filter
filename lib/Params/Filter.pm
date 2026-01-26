@@ -83,7 +83,7 @@ The main advantages of using Params::Filter are:
 =head2 Performance Considerations
 
 B<Important>: In many cases, Params::Filter is slower than manual hash lookups or 
-similar operations, especialy when the incoming data is in a known consistent 
+similar operations, especially when the incoming data is in a known consistent 
 format. The value of Params::Filter is in its capability to assure the security, 
 compliance, and correctness benefits listed above. 
 
@@ -199,6 +199,23 @@ sub new_filter {
 	};
 	bless $self, __PACKAGE__;
 	return $self;
+}
+
+sub make_filter ($req,$ok=[],$no=[]) {
+	my $exclusions	= { map { $_ => 1 } $no->@* };
+	return sub { 
+		my ($unfiltered)	= @_;
+		my $filtered		= {};
+		for ($req->@*) {
+			return unless exists $unfiltered->{$_};
+		}
+		$filtered->@{ $req->@* }	= $unfiltered->@{ $req->@* };
+		for ($ok->@*) {
+			next if $exclusions->{$_};
+			$filtered->{$_} = $unfiltered->{$_} if exists $unfiltered->{$_};
+		}
+		return $filtered;
+	};
 }
 
 =head1 SECURITY
