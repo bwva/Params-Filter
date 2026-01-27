@@ -3,7 +3,7 @@
 # More information at http://metacpan.org/release/Devel-NYTProf/
 # Format: time,calls,time/call,code
 0.000000,0,0.000000,#!/usr/bin/env perl
-0.000026,2,0.000013,use v5.40;
+0.000026,2,0.000013,use v5.36;
 0.000008,2,0.000004,use strict;
 0.000795,2,0.000398,use warnings;
 0.000572,2,0.000286,use Params::Filter qw/filter/;

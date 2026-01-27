@@ -101,7 +101,7 @@ v0.6_01 2026-01-14 (DEVELOPER RELEASE)
     - Beta release for CPAN testing and feedback
     - Renamed for CPAN publication: Local::Params::Filter → Params::Filter
     - Changed failure return value from 0 to undef for clearer boolean semantics
-    - Lowered minimum Perl version from 5.40 to 5.36 (signatures stable since 5.36)
+    - Lowered minimum Perl version from 5.36 to 5.36 (signatures stable since 5.36)
     - Updated all test files with new namespace
     - Updated all example files with new namespace
     - Updated README.md with new namespace
