@@ -31,3 +31,4 @@ cover_db/
 .tmp/
 temp/
 tmp/
+dist/

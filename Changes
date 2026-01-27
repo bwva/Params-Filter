@@ -1,5 +1,23 @@
 Revision history for Params-Filter
 
+v0.013  2026-01-27 (STABLE RELEASE)
+    - DOCUMENTATION: Major reorganization and cleanup
+    - README.md simplified from 856 to 198 lines (77% reduction)
+    - Removed duplicate API documentation from README (now in POD only)
+    - Added focused quick start examples in README
+    - POD reorganized to emphasize closure interface performance
+    - CLOSURE INTERFACE now presented first with "Maximum Performance" emphasis
+    - Added real-world security examples (safe logging, data segregation)
+    - Clear scope markers for which features apply to which interfaces
+    - EXAMPLES: Consolidated and organized
+      * Created dev-tools/ directory for development benchmarks (6 files)
+      * Removed redundant benchmarks from examples/
+      * Renamed benchmarks for clarity
+      * examples/ now has 11 teaching examples + 4 user benchmarks
+    - DISTRIBUTION: Clean perl 5.036 requirement verified
+    - Removed profiling artifacts from distribution
+    - All 73 tests pass
+
 v0.011  2026-01-26 (STABLE RELEASE)
     - NEW: Added closure interface with make_filter() function for maximum performance
     - make_filter() creates optimized, reusable closures that can be 20-25% faster than
