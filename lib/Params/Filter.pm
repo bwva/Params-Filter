@@ -100,13 +100,13 @@ The main advantages of using Params::Filter are:
 
 B<Important>: The functional and OO interfaces include features that add overhead
 compared to manual hash lookups, especially when the incoming data is in a known
-consistent format. The value of Params::Filter is in its capability to assure the
+consistent format. The value of Params::Filter shows in its capability to assure the
 security, compliance, and correctness benefits listed above.
 
-However, the L</CLOSURE INTERFACE> (C<make_filter>) provides maximum performance
-and can be faster than hand-written Perl filtering code due to pre-computed
-exclusion lookups and specialized closure variants. Use C<make_filter> for
-hot code paths or high-frequency filtering.
+For speed with fewer features, the L</CLOSURE INTERFACE> (C<make_filter>) 
+provides maximum performance and can be faster than hand-written Perl filtering 
+code due to pre-computed exclusion lookups and specialized closure variants. 
+Use C<make_filter> for hot code paths or high-frequency filtering.
 
 For all interfaces, Params::Filter CAN improve overall performance when downstream
 validation is expensive (database statements, API calls, complex regex) by failing
@@ -1476,6 +1476,7 @@ This example demonstrates how Params::Filter can integrate incoming data and seg
     my ($biz_data,        $bmsg) = $biz_filter->apply($data);
     my ($auth_data,       $amsg) = $auth_filter->apply($data);
 
+    # One way to use the filter results:
     # Set the requirement that all filtering requirements must be met
     # with data provided by any of the three webform sources:
     unless ($person_data && $biz_data && $auth_data) {
