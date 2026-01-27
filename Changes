@@ -1,5 +1,12 @@
 Revision history for Params-Filter
 
+v0.014  2026-01-27 (STABLE RELEASE)
+    - DISTRIBUTION: Fixed PAX headers issue permanently
+    - Configured Makefile.PL to use GNU tar (gtar) with --format=ustar
+    - This prevents CPAN rejection due to PAX headers created by macOS BSD tar
+    - Requires: brew install gnu-tar
+    - No code changes, distribution build fix only
+
 v0.013  2026-01-27 (STABLE RELEASE)
     - DOCUMENTATION: Major reorganization and cleanup
     - README.md simplified from 856 to 198 lines (77% reduction)
