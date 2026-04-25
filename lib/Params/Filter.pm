@@ -893,7 +893,7 @@ sub filter ($args,$req,$ok=[],$no=[],$db=0) {
 	$filtered->@{ $req->@* } = @args{ $req->@* };
 
 	# Fast return: no accepted fields (required-only)
-	unless ($ok->@* or $has_wildcard) {
+	unless ($ok->@*) {
 		my @all_msgs	= (@messages, @warnings);
 		my $return_msg	= @all_msgs
 			? join "\n" => @all_msgs
