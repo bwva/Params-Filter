@@ -47,3 +47,10 @@ WriteMakefile(
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean => { FILES => 'Params-Filter-*' },
 );
+
+sub MY::postamble {
+    return <<'MAKE_FRAG';
+cover :
+	cover -test
+MAKE_FRAG
+}
