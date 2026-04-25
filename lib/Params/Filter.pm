@@ -1,6 +1,6 @@
 package Params::Filter;
 use v5.36;
-our $VERSION = '0.017001';
+our $VERSION = '0.018';
 
 =head1 NAME
 

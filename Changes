@@ -1,5 +1,20 @@
 Revision history for Params-Filter
 
+0.018  2026-04-25
+    - Removed two dead-code branches identified by Devel::Cover:
+      * `or $has_wildcard` in fast-return condition (logically unreachable:
+        $has_wildcard can only be true when $ok->@* is already true)
+      * `elsif ($ok->@*)` in Phase 4 (always true when reached, since the
+        fast-return already handles the empty-accepted case)
+    - Added Devel::Cover integration: `make cover` target via MY::postamble
+    - Added 6 new subtests to close remaining coverage gaps:
+      * Scalar-context branches for empty-args, per-field, and Phase 4 returns
+      * Unsupported reference input type (scalar ref, coderef, regex)
+      * `required || []` defensive guard in apply() (torn-object test)
+      * `@all_msgs` true branch on fast-return path (odd-array + required-only)
+    - 100% coverage across all Devel::Cover metrics: stmt, branch, cond, sub
+    - All 84 tests passing
+
 0.017001  2026-04-08
     - Updated Changes file to document v0.017 test coverage improvements
     - v0.017 added 9 new subtests across t/01-functional.t, t/02-oo-interface.t,

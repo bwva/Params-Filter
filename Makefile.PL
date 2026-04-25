@@ -39,7 +39,7 @@ WriteMakefile(
         provides => {
             'Params::Filter' => {
                 file    => 'lib/Params/Filter.pm',
-                version => '0.017001',
+                version => '0.018',
             },
         },
     },
