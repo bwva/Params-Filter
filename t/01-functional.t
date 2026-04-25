@@ -329,4 +329,15 @@ subtest 'Phase 4 success returns hashref in scalar context (line 953)' => sub {
     is $result->{phone}, '555-0000',             'Accepted field present';
 };
 
+subtest 'Unsupported reference type yields empty args failure' => sub {
+    # A ref that is neither HASH nor ARRAY (scalar ref, coderef, regex)
+    # falls through all three input-parse branches, leaving %args empty,
+    # which triggers the `unless (keys %args)` early return.
+    for my $bad_input ( \42, sub {}, qr/foo/ ) {
+        my ($result, $msg) = filter( $bad_input, ['name'], [] );
+        ok !$result, ref($bad_input) . ' ref input fails';
+        like $msg, qr/required/, 'Error message mentions required';
+    }
+};
+
 done_testing();
