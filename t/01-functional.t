@@ -340,4 +340,22 @@ subtest 'Unsupported reference type yields empty args failure' => sub {
     }
 };
 
+subtest 'Fast-return with parsing message takes @all_msgs true branch (line 898)' => sub {
+    # An odd-element array puts a parsing message in @messages during Phase 1.
+    # With no accepted fields the fast-return fires before Phase 4, so
+    # @warnings is always empty there. @all_msgs is therefore non-empty,
+    # taking the true branch of `@all_msgs ? :` and returning the parsing
+    # message instead of the plain "Admitted".
+    my ($result, $msg) = filter(
+        ['name', 'Alice', 'verbose'],   # odd: verbose => 1
+        ['name'],                        # required
+        [],                              # no accepted - triggers fast-return
+    );
+
+    ok $result,               'Succeeds with odd-array input and required-only filter';
+    is $result->{name}, 'Alice', 'Required field present';
+    like   $msg, qr/Odd number/, 'Parsing message returned via @all_msgs true branch';
+    unlike $msg, qr/Admitted/,   'Plain "Admitted" not returned when messages present';
+};
+
 done_testing();
