@@ -292,4 +292,41 @@ subtest 'Returns undef in scalar context on failure' => sub {
     ok !defined $result, 'Returns undef (not a list) in scalar context on failure';
 };
 
+subtest 'Empty args failure returns undef in scalar context (line 863)' => sub {
+    # Empty hashref: hits the `unless (keys %args)` early return in scalar context.
+    my $result = filter(
+        {},
+        ['name'],
+        [],
+    );
+
+    ok !defined $result, 'Empty input returns undef in scalar context';
+};
+
+subtest 'Per-field required check failure returns undef in scalar context (line 889)' => sub {
+    # Two keys present, two required, but wrong keys: passes the count
+    # pre-check at line 866, then fails the per-field loop at line 889.
+    my $result = filter(
+        { wrong_key1 => 1, wrong_key2 => 2 },
+        ['name', 'email'],
+        [],
+    );
+
+    ok !defined $result, 'Wrong keys with correct count returns undef in scalar context';
+};
+
+subtest 'Phase 4 success returns hashref in scalar context (line 953)' => sub {
+    # Non-empty accepted list bypasses the fast-return at line 896,
+    # so the Phase 4 return at line 953 is reached in scalar context.
+    my $result = filter(
+        { name => 'Oscar', email => 'oscar@example.com', phone => '555-0000' },
+        ['name', 'email'],
+        ['phone'],
+    );
+
+    ok $result, 'Returns hashref in scalar context via Phase 4';
+    is $result->{name},  'Oscar',               'Required field present';
+    is $result->{phone}, '555-0000',             'Accepted field present';
+};
+
 done_testing();
