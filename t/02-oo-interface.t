@@ -291,4 +291,17 @@ subtest 'apply with manually stripped object fields exercises || defaults' => su
     is $result->{id}, 1, 'Required field present';
 };
 
+subtest 'apply with required stripped exercises required || [] guard' => sub {
+    # Deleting $self->{required} after construction forces the
+    # `$self->{required} || []` guard in apply() to supply the default.
+    my $f = Params::Filter->new_filter({ required => ['id'] });
+    delete $f->{required};
+
+    my ($result, $msg) = $f->apply({ id => 1 });
+
+    ok $result,               'apply survives missing required key';
+    ok !exists $result->{id}, 'No required fields enforced after strip';
+    like $msg, qr/Admitted/,  'Filter succeeds with defaulted empty required list';
+};
+
 done_testing();
