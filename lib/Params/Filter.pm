@@ -913,7 +913,7 @@ sub filter ($args,$req,$ok=[],$no=[],$db=0) {
 			$filtered->{$fld} = $args{$fld};
 		}
 	}
-	elsif ($ok->@*) {
+	else {
 		# Accepted-specific: only copy specified fields (unless excluded)
 		for my $fld ($ok->@*) {
 			next if $exclusions->{$fld};
