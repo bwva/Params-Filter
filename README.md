@@ -1,6 +1,6 @@
 # Params::Filter
 
-Secure field filtering for parameter construction.
+Secure field filtering for strict parameter construction.
 
 ## Description
 
